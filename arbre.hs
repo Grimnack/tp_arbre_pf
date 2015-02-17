@@ -42,39 +42,50 @@ prop_hauteurPeign xs = length xs == hauteur (peigneGauche xs)
 
 
 --Question 7
--- FAUX !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 estComplet :: Arbre c a -> Bool
 estComplet Vide = True
-estComplet (Noeud _ _ Vide Vide) = True
-estComplet (Noeud _ _ Vide _) = False
-estComplet (Noeud _ _ _ Vide) = False
-estComplet (Noeud _ _ gauche droit) = (estComplet gauche) && (estComplet droit)
-
-
-
+estComplet (Noeud _ _ gauche droit) = if taille gauche == taille droit then
+								      	(estComplet gauche) && 
+									  	(estComplet droit)   
+									  else 
+									  	False
 
 --Question 8
 --Les peignes à gauche complet est l'abre de hauteur 1.
 
---fonction intermediaire prenant une liste et une hauteur est renvoie la premiere moitié 
--- de la liste - 1 elmt
-
-
-
-premiere :: Int -> [(a,b)] -> [(a,b)]
-premiere h xs =  take ((2^(h-1))-1) xs
-
-seconde :: Int  -> [(a,b)] -> [(a,b)]
-seconde h xs = reverse (take ((2^(h-1))-1) (reverse xs))
-
-milieu :: Int -> [(a,b)] -> (a,b)
-milieu h xs = (!!) xs ((2^(h-1))-1)
-
-
-complet :: Int -> [(c, a)] -> Arbre c a
-complet 0 _ = Vide
-complet n xs = Noeud (fst (milieu n xs)) (snd (milieu n xs)) (complet (premiere n xs)) (complet (seconde n xs)) 
+--Question 9
  
+complet' :: Int -> [(c, a)] -> (Arbre c a,[(c, a)]) 
+complet' 0 xs  = (Vide, xs)
+complet' n xs  = (Noeud c v gauche droite , zs)
+                  where (gauche, r1) = complet' (n-1) xs
+                        (c,v)        = head r1
+                        (droite, zs) = complet' (n-1) (tail r1)   
+ 
+complet :: Int -> [(c, a)] -> Arbre c a
+complet n xs = fst (complet' n xs)
+
+
+--Question 10
+infini :: a -> [a]
+infini x = iterate id x
+ 
+--Question 11
+creeListeCouple :: [((), Char)]
+creeListeCouple = map (\x -> ((),x)) ['a'..]
+ 
+--Question 12
+aplatit :: Arbre c a -> [(c, a)]
+aplatit Vide = []
+aplatit (Noeud c a gauche droite) = aplatit gauche ++ [(c,a)] ++ aplatit droite
+ 
+--Question 13
+element :: Eq a => a -> Arbre c a -> Bool
+element _ Vide = False
+element a (Noeud _ b gauche droite)= if a == b then
+                                       True
+                                     else
+                                       (element a gauche) || (element a droite)
 
 
 
@@ -103,36 +114,24 @@ complet n xs = Noeud (fst (milieu n xs)) (snd (milieu n xs)) (complet (premiere 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 

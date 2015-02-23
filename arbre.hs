@@ -1,6 +1,14 @@
 -- TP Arbre Matthieu Caron et Arnaud Cojez
 
 import Test.QuickCheck
+import Control.Concurrent (threadDelay)
+
+main = mapM_ ecrit arbres
+    where ecrit a = do writeFile "arbre.dot" a
+                       threadDelay 1000000
+          arbres  = arbresDot "gcfxieqzrujlmdoywnbakhpvst"
+
+
 
 data Arbre coul val = Vide | Noeud coul val (Arbre coul val) (Arbre coul val) deriving Show
 
@@ -122,21 +130,66 @@ showArc farc ((a,b):xs) = (arc farc (a,b)) ++ (showArc farc xs)
 dotise :: String -> (c -> String) -> (a -> String) -> Arbre c a -> String
 dotise nomArbre fcol fval arbre = "digraph \""++nomArbre++"\" { \n   node [fontname=\"DejaVu-Sans\", shape=circle]\n" ++(noeuds fcol fval arbre)++ "\n" ++ (showArc fval (arcs arbre)) ++ "}"
 
+--Q18 
+elementR x Vide = False
+elementR x (Noeud _ v ag ad)
+  | x < v = elementR x ag
+  | x > v = elementR x ad 
+  | otherwise = True
 
+--Q19
+data Couleur = N | R
+ 
+--Q20
+é = equilibre
+equilibre :: Arbre Couleur a -> Arbre Couleur a
+equilibre Vide = Vide
+equilibre (Noeud N vz (Noeud R vy (Noeud R vx a b) c) d) =
+  Noeud R vy (Noeud N vx (equilibre a) (equilibre b)) (Noeud N vz (equilibre c) (equilibre d))
+equilibre (Noeud N vz (Noeud R vx a (Noeud R vy b c)) d) =
+  Noeud R vy (Noeud N vx (equilibre a) (equilibre b)) (Noeud N vz (equilibre c) (equilibre d))
+equilibre (Noeud N vx a (Noeud R vz (Noeud R vy b c) d)) =
+  Noeud R vy (Noeud N vx (equilibre a) (equilibre b)) (Noeud N vz (equilibre c) (equilibre d))
+equilibre (Noeud N vx a (Noeud R vy b (Noeud R vz c d))) =
+  Noeud R vy (Noeud N vx (equilibre a) (equilibre b)) (Noeud N vz (equilibre c) (equilibre d))
+equilibre (Noeud c v g d) = Noeud c v (equilibre g) (equilibre d)
 
+racineNoire (Noeud _ v g d) = Noeud N v g d
+{-
+insertion a x = racineNoire (insertion' a x)
 
+insertion' :: (Ord a) => Arbre Couleur a -> a -> Arbre Couleur a
+insertion' Vide a = Noeud R a Vide Vide
+insertion' arbre@(Noeud c a gauche droite) x 
+  | elementR x arbre = arbre
+  | x < a            = equilibre (Noeud c a (insertion' gauche x) droite)
+  | otherwise        = equilibre (Noeud c a gauche (insertion' droite x))
+           -}      
+insertion :: (Ord val) => val -> Arbre Couleur val -> Arbre Couleur val
+insertion e a = racineNoire res
+           where res = insertion' e a
+                    where insertion' :: (Ord val) => val -> Arbre Couleur val -> Arbre Couleur val
+                          insertion' elem Vide             = Noeud R elem Vide Vide
+                          insertion' elem all@(Noeud c v g d) =   if elementR elem all
+                                                                  then all
+                                                                  else
+                                                                    if elem <= v 
+                                                                    then é (Noeud c v (insertion' elem g) d)
+                                                                    else é (Noeud c v g (insertion' elem d))
+      
+arbresDot' :: (Ord a) => [a] -> Arbre Couleur a -> [Arbre Couleur a]
+arbresDot' [] _ = []
+arbresDot' (x:xs) arbre = ins : (arbresDot' xs ins)
+                          where ins = (insertion x arbre)
 
+couleur2String :: Couleur -> String
+couleur2String    = \c -> case c of   N -> "[color=black, fontcolor=black]"
+                                      R -> "[color=red, fontcolor=red]"
+char2String :: Char -> String
+char2String  = (: [])
 
-
-
-
-
-
-
-
-
-
-
+arbresDot :: [Char] -> [String]
+arbresDot xs = map (dotise "arbre" couleur2String char2String) (arbresDot' xs Vide) 
 
 
 

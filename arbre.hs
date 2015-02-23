@@ -127,8 +127,25 @@ showArc ::  (a -> String) -> [(a,a)] -> String
 showArc _ [] = ""
 showArc farc ((a,b):xs) = (arc farc (a,b)) ++ (showArc farc xs)
 
+{-
 dotise :: String -> (c -> String) -> (a -> String) -> Arbre c a -> String
 dotise nomArbre fcol fval arbre = "digraph \""++nomArbre++"\" { \n   node [fontname=\"DejaVu-Sans\", shape=circle]\n" ++(noeuds fcol fval arbre)++ "\n" ++ (showArc fval (arcs arbre)) ++ "}"
+-}
+
+dotise :: String -> (c -> String) -> (v -> String) -> Arbre c v -> String
+dotise nom f g a =  "digraph "++['"'] ++ nom ++ ['"'] ++ " {\n"
+                    ++ "node [fontname="++['"']++"DejaVu-Sans"++['"']++", shape=circle] \n"
+                    ++ unlines (map (\n -> noeud f g n ++ [' ']) (aplatit a))
+                    ++ unlines (map (arc g) (arcs a))
+                    ++ "}"
+
+
+
+
+
+
+
+
 
 --Q18 
 elementR x Vide = False

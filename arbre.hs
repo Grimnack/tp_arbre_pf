@@ -91,6 +91,14 @@ element a (Noeud _ b gauche droite)= if a == b then
 noeud :: (c -> String) -> (a -> String) -> (c,a) -> String
 noeud fcol fval (c,v) = fval v ++ fcol c 
 
+
+noeuds :: (c -> String) -> (a -> String) -> Arbre c a -> String
+noeuds _ _ Vide = ""
+noeuds fcol fval (Noeud c a gauche droite) = (noeud fcol fval (c,a))++"\n"++
+                                             (noeuds fcol fval gauche)++
+                                             (noeuds fcol fval droite)
+
+
 --Question 15
 arcs :: Arbre c a -> [(a,a)]
 arcs  Vide                     = []
@@ -107,6 +115,12 @@ arcs (Noeud _ a gauche droite) = [(a,b)] ++ [(a,c)] ++ arcs gauche
 arc :: (a -> String) -> (a,a) -> String
 arc farc (a,b) = farc a ++ " -> " ++ farc b ++ "\n"
 
+showArc ::  (a -> String) -> [(a,a)] -> String
+showArc _ [] = ""
+showArc farc ((a,b):xs) = (arc farc (a,b)) ++ (showArc farc xs)
+
+dotise :: String -> (c -> String) -> (a -> String) -> Arbre c a -> String
+dotise nomArbre fcol fval arbre = "digraph \""++nomArbre++"\" { \n   node [fontname=\"DejaVu-Sans\", shape=circle]\n" ++(noeuds fcol fval arbre)++ "\n" ++ (showArc fval (arcs arbre)) ++ "}"
 
 
 
